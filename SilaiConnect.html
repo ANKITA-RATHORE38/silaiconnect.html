@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SilaiConnect – Find Local Tailors Near You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1208;
+    --cream: #fdf8f0;
+    --saffron: #e8861a;
+    --saffron-light: #fdf0dc;
+    --saffron-dark: #b5620d;
+    --thread: #c0392b;
+    --sage: #5a7a5e;
+    --muted: #6b5e4e;
+    --border: #e8ddd0;
+    --white: #ffffff;
+    --shadow: 0 2px 20px rgba(26,18,8,0.08);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--cream); color: var(--ink); font-size: 16px; line-height: 1.6; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(253,248,240,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5%; height: 64px;
+  }
+  .nav-logo { font-family: var(--font-display); font-size: 22px; color: var(--ink); text-decoration: none; }
+  .nav-logo span { color: var(--saffron); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta { display: flex; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 20px; border-radius: 8px; font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s; text-decoration: none; border: none; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:hover { border-color: var(--saffron); color: var(--saffron); }
+  .btn-primary { background: var(--saffron); color: var(--white); }
+  .btn-primary:hover { background: var(--saffron-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(232,134,26,0.3); }
+  .btn-large { padding: 14px 32px; font-size: 16px; border-radius: 10px; }
+  .btn-white { background: var(--white); color: var(--saffron); }
+  .btn-white:hover { background: var(--saffron-light); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 80px 5% 60px;
+    background: var(--cream);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -100px; right: -100px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(232,134,26,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: var(--saffron-light); color: var(--saffron-dark); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; margin-bottom: 20px; }
+  .hero-eyebrow::before { content: '✦'; font-size: 10px; }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(38px, 5vw, 62px); line-height: 1.1; font-weight: 900; margin-bottom: 20px; }
+  .hero h1 em { color: var(--saffron); font-style: normal; }
+  .hero p { font-size: 18px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; max-width: 460px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+  .hero-stats { display: flex; gap: 32px; }
+  .stat-item { }
+  .stat-num { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--ink); }
+  .stat-label { font-size: 13px; color: var(--muted); }
+
+  /* Hero visual */
+  .hero-visual { position: relative; }
+  .hero-card-main {
+    background: var(--white); border-radius: 20px; padding: 24px; box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .tailor-profile { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .tailor-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; }
+  .avatar-1 { background: #fde68a; color: #92400e; }
+  .avatar-2 { background: #bbf7d0; color: #065f46; }
+  .avatar-3 { background: #fecaca; color: #991b1b; }
+  .tailor-info h3 { font-size: 16px; font-weight: 600; }
+  .tailor-info p { font-size: 13px; color: var(--muted); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .tag { background: var(--saffron-light); color: var(--saffron-dark); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .tag-green { background: #dcfce7; color: #166534; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; }
+  .price { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+  .rating { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
+  .star { color: #f59e0b; }
+  .floating-badge {
+    position: absolute;
+    background: var(--white); border-radius: 12px; padding: 10px 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    border: 1px solid var(--border); font-size: 13px; font-weight: 500;
+  }
+  .badge-orders { top: -20px; right: -20px; }
+  .badge-live { bottom: 20px; left: -30px; display: flex; align-items: center; gap: 8px; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.4)} 50%{box-shadow:0 0 0 6px rgba(34,197,94,0)} }
+
+  /* ── SEARCH BAR ── */
+  .search-section { background: var(--white); padding: 40px 5%; border-bottom: 1px solid var(--border); }
+  .search-inner { max-width: 900px; margin: 0 auto; }
+  .search-bar {
+    display: flex; gap: 0; border: 2px solid var(--border); border-radius: 12px; overflow: hidden;
+    transition: border-color .2s; background: var(--white);
+  }
+  .search-bar:focus-within { border-color: var(--saffron); }
+  .search-field { flex: 1; display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-right: 1px solid var(--border); }
+  .search-field:last-of-type { border-right: none; }
+  .search-field svg { flex-shrink: 0; color: var(--muted); }
+  .search-field input, .search-field select {
+    border: none; outline: none; background: transparent; font-family: var(--font-body); font-size: 15px; color: var(--ink); width: 100%;
+  }
+  .search-field select { cursor: pointer; }
+  .search-bar .btn-primary { margin: 6px; border-radius: 8px; padding: 12px 24px; }
+  .filter-chips { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .chip { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-family: var(--font-body); font-size: 13px; color: var(--muted); cursor: pointer; transition: all .2s; }
+  .chip:hover, .chip.active { border-color: var(--saffron); background: var(--saffron-light); color: var(--saffron-dark); }
+
+  /* ── SECTIONS ── */
+  section { padding: 80px 5%; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 52px; }
+  .section-eyebrow { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--saffron); margin-bottom: 12px; }
+  .section-title { font-family: var(--font-display); font-size: clamp(28px, 3.5vw, 42px); font-weight: 700; margin-bottom: 16px; }
+  .section-sub { font-size: 17px; color: var(--muted); max-width: 500px; margin: 0 auto; }
+
+  /* ── TAILOR CARDS ── */
+  .tailors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+  .tailor-card {
+    background: var(--white); border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border); transition: all .25s; cursor: pointer;
+  }
+  .tailor-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(26,18,8,0.12); border-color: var(--saffron); }
+  .card-cover {
+    height: 140px; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cover-pattern { width: 100%; height: 100%; position: absolute; inset: 0; }
+  .cover-1 { background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%); }
+  .cover-2 { background: linear-gradient(135deg, #bbf7d0 0%, #34d399 100%); }
+  .cover-3 { background: linear-gradient(135deg, #fecaca 0%, #f87171 100%); }
+  .cover-4 { background: linear-gradient(135deg, #ddd6fe 0%, #a78bfa 100%); }
+  .cover-5 { background: linear-gradient(135deg, #fed7aa 0%, #fb923c 100%); }
+  .cover-6 { background: linear-gradient(135deg, #bae6fd 0%, #38bdf8 100%); }
+  .cover-emoji { font-size: 48px; position: relative; z-index: 1; }
+  .verified-badge { position: absolute; top: 12px; right: 12px; background: var(--white); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--sage); display: flex; align-items: center; gap: 4px; }
+  .card-body { padding: 20px; }
+  .card-body h3 { font-size: 17px; font-weight: 600; margin-bottom: 2px; }
+  .card-location { font-size: 13px; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 4px; }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); }
+  .card-price { font-size: 13px; color: var(--muted); }
+  .card-price strong { font-size: 16px; color: var(--ink); font-weight: 600; }
+  .card-rating { display: flex; align-items: center; gap: 4px; font-size: 13px; }
+  .book-btn { margin-top: 14px; width: 100%; text-align: center; }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { background: var(--ink); color: var(--white); }
+  .how-section .section-title { color: var(--white); }
+  .how-section .section-sub { color: rgba(255,255,255,0.6); }
+  .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
+  .step-card { text-align: center; padding: 32px 24px; }
+  .step-icon { width: 64px; height: 64px; border-radius: 16px; background: rgba(232,134,26,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; border: 1px solid rgba(232,134,26,0.3); }
+  .step-num { font-size: 12px; color: var(--saffron); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .step-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+  .step-card p { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.7; }
+
+  /* ── SERVICES ── */
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  .service-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px 16px; text-align: center; cursor: pointer; transition: all .2s;
+  }
+  .service-card:hover { border-color: var(--saffron); background: var(--saffron-light); transform: translateY(-2px); }
+  .service-icon { font-size: 36px; margin-bottom: 12px; }
+  .service-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .service-card p { font-size: 12px; color: var(--muted); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-section { background: var(--saffron-light); }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+  .testimonial-card { background: var(--white); border-radius: 16px; padding: 28px; border: 1px solid var(--border); }
+  .testimonial-stars { color: #f59e0b; font-size: 18px; margin-bottom: 16px; }
+  .testimonial-text { font-size: 15px; color: var(--ink); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+  .testimonial-author { display: flex; align-items: center; gap: 12px; }
+  .author-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .author-name { font-weight: 600; font-size: 14px; }
+  .author-city { font-size: 12px; color: var(--muted); }
+
+  /* ── TAILOR CTA ── */
+  .tailor-cta-section { background: var(--saffron); }
+  .tailor-cta-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .tailor-cta h2 { font-family: var(--font-display); font-size: clamp(28px, 3.5vw, 42px); font-weight: 700; color: var(--white); margin-bottom: 16px; }
+  .tailor-cta p { font-size: 17px; color: rgba(255,255,255,0.85); margin-bottom: 28px; line-height: 1.7; }
+  .cta-benefits { list-style: none; margin-bottom: 32px; }
+  .cta-benefits li { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.9); font-size: 15px; padding: 6px 0; }
+  .cta-benefits li::before { content: '✓'; background: rgba(255,255,255,0.25); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .cta-visual { text-align: center; }
+  .earnings-card { background: var(--white); border-radius: 20px; padding: 32px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
+  .earnings-card h3 { font-family: var(--font-display); font-size: 36px; font-weight: 700; color: var(--saffron); margin-bottom: 4px; }
+  .earnings-label { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .earning-bars { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .bar-label { width: 60px; color: var(--muted); text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 8px; background: #f0ebe4; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--saffron); border-radius: 4px; transition: width 1s ease; }
+  .bar-amount { width: 55px; color: var(--ink); font-weight: 500; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(26,18,8,0.6); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--white); border-radius: 20px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-header { padding: 28px 28px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+  .modal-header h2 { font-family: var(--font-display); font-size: 24px; font-weight: 700; }
+  .modal-close { background: var(--cream); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+  .modal-close:hover { background: var(--border); }
+  .modal-body { padding: 24px 28px 28px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: var(--font-body); font-size: 15px; color: var(--ink); background: var(--white);
+    outline: none; transition: border-color .2s; resize: vertical;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--saffron); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal-footer { padding: 0 28px 28px; }
+  .success-msg { display: none; text-align: center; padding: 20px; }
+  .success-msg.show { display: block; }
+  .success-icon { font-size: 48px; margin-bottom: 12px; }
+  .success-msg h3 { font-family: var(--font-display); font-size: 22px; margin-bottom: 8px; }
+  .success-msg p { color: var(--muted); font-size: 14px; }
+
+  /* ── FOOTER ── */
+  footer { background: var(--ink); color: rgba(255,255,255,0.7); padding: 60px 5% 32px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; max-width: 1200px; margin: 0 auto 48px; }
+  .footer-brand .nav-logo { color: var(--white); display: block; margin-bottom: 14px; }
+  .footer-brand p { font-size: 14px; line-height: 1.7; max-width: 260px; }
+  .footer-col h4 { color: var(--white); font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: color .2s; }
+  .footer-col ul a:hover { color: var(--saffron); }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; font-size: 13px; }
+  .social-links { display: flex; gap: 12px; }
+  .social-link { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; text-decoration: none; color: rgba(255,255,255,0.7); font-size: 14px; transition: background .2s; }
+  .social-link:hover { background: var(--saffron); color: var(--white); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 2000;
+    background: var(--ink); color: var(--white); padding: 14px 20px; border-radius: 10px;
+    font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transform: translateY(80px); opacity: 0; transition: all .35s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 4%; }
+    .nav-links { display: none; }
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .tailor-cta-inner { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .search-field:nth-child(2) { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Silai<span>Connect</span></a>
+  <ul class="nav-links">
+    <li><a href="#tailors">Find Tailors</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#join">For Tailors</a></li>
+  </ul>
+  <div class="nav-cta">
+    <button class="btn btn-outline" onclick="openModal('login')">Log in</button>
+    <button class="btn btn-primary" onclick="openModal('signup')">Sign up</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <span class="hero-eyebrow">Now live across 40+ cities in India</span>
+      <h1>Your perfect fit,<br><em>stitched nearby</em></h1>
+      <p>Connect with skilled local tailors for custom outfits, alterations, and repairs. Quality tailoring, delivered to your door or picked up from your home.</p>
+      <div class="hero-actions">
+        <a href="#tailors" class="btn btn-primary btn-large">Find a tailor</a>
+        <a href="#join" class="btn btn-outline btn-large">Join as tailor</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">8,200+</div>
+          <div class="stat-label">Verified tailors</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">96%</div>
+          <div class="stat-label">Satisfaction rate</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">₹299</div>
+          <div class="stat-label">Starting price</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-main">
+        <div class="tailor-profile">
+          <div class="tailor-avatar avatar-1">RS</div>
+          <div class="tailor-info">
+            <h3>Ravi Sharma</h3>
+            <p>Master Tailor · Lucknow</p>
+          </div>
+        </div>
+        <div class="tag-row">
+          <span class="tag">Sherwani</span>
+          <span class="tag">Kurta</span>
+          <span class="tag">Saree Blouse</span>
+          <span class="tag-green tag">✓ Verified</span>
+        </div>
+        <div class="price-row">
+          <div class="price">₹850 <small style="font-size:14px;font-family:var(--font-body);font-weight:400;color:var(--muted)">/ piece</small></div>
+          <div class="rating"><span class="star">★</span> 4.9 (124 reviews)</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:16px;justify-content:center" onclick="openModal('book')">Book now</button>
+      </div>
+      <div class="floating-badge badge-orders">🧵 14 orders this week</div>
+      <div class="floating-badge badge-live"><span class="live-dot"></span> Available today</div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-inner">
+    <div class="search-bar">
+      <div class="search-field">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="What do you need? (e.g. blouse stitching)">
+      </div>
+      <div class="search-field">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <input type="text" placeholder="Your city or area">
+      </div>
+      <div class="search-field">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <select>
+          <option>Any rating</option>
+          <option>4.5+ stars</option>
+          <option>4.0+ stars</option>
+          <option>New tailors</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="showToast('Searching for tailors near you...')">Search</button>
+    </div>
+    <div class="filter-chips">
+      <button class="chip active" onclick="filterChip(this)">All services</button>
+      <button class="chip" onclick="filterChip(this)">Blouse & saree</button>
+      <button class="chip" onclick="filterChip(this)">Salwar kameez</button>
+      <button class="chip" onclick="filterChip(this)">Sherwani</button>
+      <button class="chip" onclick="filterChip(this)">Alterations</button>
+      <button class="chip" onclick="filterChip(this)">Kids wear</button>
+      <button class="chip" onclick="filterChip(this)">Home visit</button>
+      <button class="chip" onclick="filterChip(this)">Cloth pickup</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAILORS -->
+<section id="tailors">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-eyebrow">Our tailors</span>
+      <h2 class="section-title">Top-rated tailors near you</h2>
+      <p class="section-sub">Every tailor is verified, reviewed, and ready to take your measurements.</p>
+    </div>
+    <div class="tailors-grid">
+
+      <div class="tailor-card" onclick="openModal('book')">
+        <div class="card-cover cover-1"><span class="cover-emoji">🧵</span><span class="verified-badge">✓ Verified</span></div>
+        <div class="card-body">
+          <h3>Meena Devi</h3>
+          <div class="card-location">📍 Hazratganj, Lucknow</div>
+          <div class="card-tags">
+            <span class="tag">Saree blouse</span><span class="tag">Lehenga</span><span class="tag">Anarkali</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">from <strong>₹499</strong></div>
+            <div class="card-rating"><span class="star">★</span> 4.8 (89)</div>
+          </div>
+          <button class="btn btn-primary book-btn" onclick="event.stopPropagation();openModal('book')">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="tailor-card" onclick="openModal('book')">
+        <div class="card-cover cover-2"><span class="cover-emoji">👔</span><span class="verified-badge">✓ Verified</span></div>
+        <div class="card-body">
+          <h3>Arjun Tailors</h3>
+          <div class="card-location">📍 Civil Lines, Gorakhpur</div>
+          <div class="card-tags">
+            <span class="tag">Sherwani</span><span class="tag">Suit</span><span class="tag">Kurta</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">from <strong>₹750</strong></div>
+            <div class="card-rating"><span class="star">★</span> 4.9 (156)</div>
+          </div>
+          <button class="btn btn-primary book-btn" onclick="event.stopPropagation();openModal('book')">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="tailor-card" onclick="openModal('book')">
+        <div class="card-cover cover-3"><span class="cover-emoji">👗</span><span class="verified-badge">✓ Verified</span></div>
+        <div class="card-body">
+          <h3>Sunita Boutique</h3>
+          <div class="card-location">📍 Karol Bagh, Delhi</div>
+          <div class="card-tags">
+            <span class="tag">Bridal wear</span><span class="tag">Designer</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">from <strong>₹1,200</strong></div>
+            <div class="card-rating"><span class="star">★</span> 5.0 (42)</div>
+          </div>
+          <button class="btn btn-primary book-btn" onclick="event.stopPropagation();openModal('book')">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="tailor-card" onclick="openModal('book')">
+        <div class="card-cover cover-4"><span class="cover-emoji">🪡</span><span class="verified-badge">✓ Verified</span></div>
+        <div class="card-body">
+          <h3>Ramesh & Sons</h3>
+          <div class="card-location">📍 Aminabad, Lucknow</div>
+          <div class="card-tags">
+            <span class="tag">Alterations</span><span class="tag">School uniforms</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">from <strong>₹299</strong></div>
+            <div class="card-rating"><span class="star">★</span> 4.7 (203)</div>
+          </div>
+          <button class="btn btn-primary book-btn" onclick="event.stopPropagation();openModal('book')">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="tailor-card" onclick="openModal('book')">
+        <div class="card-cover cover-5"><span class="cover-emoji">✂️</span><span class="verified-badge">✓ Verified</span></div>
+        <div class="card-body">
+          <h3>Fatima Creations</h3>
+          <div class="card-location">📍 Chowk, Varanasi</div>
+          <div class="card-tags">
+            <span class="tag">Banarasi work</span><span class="tag">Suit</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">from <strong>₹650</strong></div>
+            <div class="card-rating"><span class="star">★</span> 4.9 (77)</div>
+          </div>
+          <button class="btn btn-primary book-btn" onclick="event.stopPropagation();openModal('book')">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="tailor-card" onclick="openModal('book')">
+        <div class="card-cover cover-6"><span class="cover-emoji">🧶</span><span class="verified-badge">✓ Verified</span></div>
+        <div class="card-body">
+          <h3>Priya Fashion Studio</h3>
+          <div class="card-location">📍 Aliganj, Lucknow</div>
+          <div class="card-tags">
+            <span class="tag">Kids wear</span><span class="tag">Western</span><span class="tag">Frock</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price">from <strong>₹350</strong></div>
+            <div class="card-rating"><span class="star">★</span> 4.8 (115)</div>
+          </div>
+          <button class="btn btn-primary book-btn" onclick="event.stopPropagation();openModal('book')">Book appointment</button>
+        </div>
+      </div>
+
+    </div>
+    <div style="text-align:center;margin-top:40px">
+      <button class="btn btn-outline btn-large" onclick="showToast('Loading more tailors...')">Show all tailors</button>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" style="background:var(--white)">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-eyebrow">Services</span>
+      <h2 class="section-title">What can we stitch for you?</h2>
+      <p class="section-sub">From everyday alterations to bridal masterpieces, find the right skill for every need.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card" onclick="showToast('Browsing saree blouse tailors...')">
+        <div class="service-icon">👗</div>
+        <h3>Saree blouse</h3>
+        <p>From ₹299</p>
+      </div>
+      <div class="service-card" onclick="showToast('Browsing salwar kameez tailors...')">
+        <div class="service-icon">👘</div>
+        <h3>Salwar kameez</h3>
+        <p>From ₹450</p>
+      </div>
+      <div class="service-card" onclick="showToast('Browsing sherwani tailors...')">
+        <div class="service-icon">🥻</div>
+        <h3>Sherwani</h3>
+        <p>From ₹1,500</p>
+      </div>
+      <div class="service-card" onclick="showToast('Browsing lehenga tailors...')">
+        <div class="service-icon">✨</div>
+        <h3>Lehenga</h3>
+        <p>From ₹800</p>
+      </div>
+      <div class="service-card" onclick="showToast('Browsing alteration tailors...')">
+        <div class="service-icon">✂️</div>
+        <h3>Alterations</h3>
+        <p>From ₹199</p>
+      </div>
+      <div class="service-card" onclick="showToast('Browsing kids wear tailors...')">
+        <div class="service-icon">🎀</div>
+        <h3>Kids wear</h3>
+        <p>From ₹299</p>
+      </div>
+      <div class="service-card" onclick="showToast('Browsing suit tailors...')">
+        <div class="service-icon">👔</div>
+        <h3>Formal suit</h3>
+        <p>From ₹1,200</p>
+      </div>
+      <div class="service-card" onclick="showToast('Browsing uniform tailors...')">
+        <div class="service-icon">📐</div>
+        <h3>Uniforms</h3>
+        <p>From ₹350</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-eyebrow">How it works</span>
+      <h2 class="section-title">Ready-to-wear in four steps</h2>
+      <p class="section-sub">Booking a tailor has never been this easy.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-icon">🔍</div>
+        <div class="step-num">Step 1</div>
+        <h3>Search</h3>
+        <p>Find verified tailors in your city filtered by service, rating, and price.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">📅</div>
+        <div class="step-num">Step 2</div>
+        <h3>Book a slot</h3>
+        <p>Pick a time for home visit, cloth pickup, or shop visit. Pay securely online.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">📏</div>
+        <div class="step-num">Step 3</div>
+        <h3>Measurements</h3>
+        <p>Share your measurements via app or let the tailor measure you at home.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">🎉</div>
+        <div class="step-num">Step 4</div>
+        <h3>Delivered</h3>
+        <p>Receive your perfectly fitted outfit. Pay only when you are happy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-eyebrow">Reviews</span>
+      <h2 class="section-title">What our customers say</h2>
+      <p class="section-sub">Thousands of happy customers across India.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Found an amazing tailor for my sister's wedding lehenga. He came home, took measurements, and delivered in 5 days. Absolutely stunning work!"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:#fde68a;color:#92400e">PG</div>
+          <div><div class="author-name">Pooja Gupta</div><div class="author-city">Lucknow, UP</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Got my old sherwani altered perfectly for just ₹350. The tailor was on time and the quality was far better than local shops. Will use again!"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:#bbf7d0;color:#065f46">AK</div>
+          <div><div class="author-name">Amit Kumar</div><div class="author-city">Gorakhpur, UP</div></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★☆</div>
+        <p class="testimonial-text">"I ordered 12 school uniforms for my kids through SilaiConnect. Bulk discount was great and delivery was right on time before school reopened."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:#fecaca;color:#991b1b">SS</div>
+          <div><div class="author-name">Sunita Singh</div><div class="author-city">Kanpur, UP</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN AS TAILOR -->
+<section class="tailor-cta-section" id="join">
+  <div class="section-inner">
+    <div class="tailor-cta-inner">
+      <div class="tailor-cta">
+        <h2>Are you a tailor? Start earning more today.</h2>
+        <p>Join 8,200+ tailors already growing their business on SilaiConnect. No upfront cost — just more customers, more orders, more income.</p>
+        <ul class="cta-benefits">
+          <li>Free profile and listing setup</li>
+          <li>Payments directly to your bank account</li>
+          <li>Keep 85% of every order</li>
+          <li>Get orders from your neighbourhood</li>
+          <li>Grow with ratings and repeat customers</li>
+        </ul>
+        <button class="btn btn-white btn-large" onclick="openModal('tailor')">Register as tailor →</button>
+      </div>
+      <div class="cta-visual">
+        <div class="earnings-card">
+          <h3>₹28,400</h3>
+          <p class="earnings-label">Avg. monthly earnings for active tailors</p>
+          <div class="earning-bars">
+            <div class="bar-row">
+              <span class="bar-label">Mon</span>
+              <div class="bar-track"><div class="bar-fill" style="width:60%"></div></div>
+              <span class="bar-amount">₹4,200</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Tue</span>
+              <div class="bar-track"><div class="bar-fill" style="width:40%"></div></div>
+              <span class="bar-amount">₹2,800</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Wed</span>
+              <div class="bar-track"><div class="bar-fill" style="width:80%"></div></div>
+              <span class="bar-amount">₹5,600</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Thu</span>
+              <div class="bar-track"><div class="bar-fill" style="width:55%"></div></div>
+              <span class="bar-amount">₹3,850</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">Fri</span>
+              <div class="bar-track"><div class="bar-fill" style="width:90%"></div></div>
+              <span class="bar-amount">₹6,300</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">Silai<span style="color:var(--saffron)">Connect</span></a>
+      <p>Connecting skilled local tailors with customers across India. Quality tailoring, delivered with trust.</p>
+    </div>
+    <div class="footer-col">
+      <h4>For customers</h4>
+      <ul>
+        <li><a href="#">Find a tailor</a></li>
+        <li><a href="#">How it works</a></li>
+        <li><a href="#">Browse services</a></li>
+        <li><a href="#">Track order</a></li>
+        <li><a href="#">Gift cards</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>For tailors</h4>
+      <ul>
+        <li><a href="#">Join as a tailor</a></li>
+        <li><a href="#">Tailor app</a></li>
+        <li><a href="#">Earnings calculator</a></li>
+        <li><a href="#">Training resources</a></li>
+        <li><a href="#">Tailor stories</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About us</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Privacy policy</a></li>
+        <li><a href="#">Terms of service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 SilaiConnect. Made with ❤️ in India.</span>
+    <div class="social-links">
+      <a href="#" class="social-link">f</a>
+      <a href="#" class="social-link">in</a>
+      <a href="#" class="social-link">tw</a>
+      <a href="#" class="social-link">yt</a>
+    </div>
+  </div>
+</footer>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBg(event)">
+
+  <!-- BOOK MODAL -->
+  <div class="modal" id="modal-book" style="display:none">
+    <div class="modal-header">
+      <h2>Book appointment</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="book-form">
+      <div class="form-group">
+        <label>Your name</label>
+        <input type="text" placeholder="Enter your full name">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone number</label>
+          <input type="tel" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" placeholder="Your city">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Service required</label>
+        <select>
+          <option>Saree blouse</option>
+          <option>Salwar kameez</option>
+          <option>Sherwani</option>
+          <option>Lehenga</option>
+          <option>Alteration</option>
+          <option>Kids wear</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Preferred date</label>
+          <input type="date">
+        </div>
+        <div class="form-group">
+          <label>Visit type</label>
+          <select>
+            <option>Home visit</option>
+            <option>Cloth pickup</option>
+            <option>Visit tailor shop</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Special instructions (optional)</label>
+        <textarea placeholder="Any design references, fabric type, special requirements..." rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="success-msg" id="book-success">
+        <div class="success-icon">🎉</div>
+        <h3>Booking confirmed!</h3>
+        <p>You'll receive a confirmation SMS and the tailor will call you within 2 hours.</p>
+      </div>
+      <button class="btn btn-primary btn-large" style="width:100%;justify-content:center" onclick="submitBook()">Confirm booking</button>
+    </div>
+  </div>
+
+  <!-- LOGIN MODAL -->
+  <div class="modal" id="modal-login" style="display:none">
+    <div class="modal-header">
+      <h2>Log in to SilaiConnect</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Phone or email</label>
+        <input type="text" placeholder="Enter phone or email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="Enter password">
+      </div>
+      <a href="#" style="font-size:13px;color:var(--saffron);text-decoration:none">Forgot password?</a>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-large" style="width:100%;justify-content:center;margin-bottom:12px" onclick="showToast('✅ Logged in successfully!');closeModal()">Log in</button>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">Don't have an account? <a href="#" style="color:var(--saffron);text-decoration:none" onclick="switchModal('signup')">Sign up</a></p>
+    </div>
+  </div>
+
+  <!-- SIGNUP MODAL -->
+  <div class="modal" id="modal-signup" style="display:none">
+    <div class="modal-header">
+      <h2>Create your account</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First name</label>
+          <input type="text" placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label>Last name</label>
+          <input type="text" placeholder="Last name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Phone number</label>
+        <input type="tel" placeholder="+91 98765 43210">
+      </div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" placeholder="Your city">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="Create a password">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-large" style="width:100%;justify-content:center;margin-bottom:12px" onclick="showToast('✅ Account created! Welcome to SilaiConnect!');closeModal()">Create account</button>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">Already have an account? <a href="#" style="color:var(--saffron);text-decoration:none" onclick="switchModal('login')">Log in</a></p>
+    </div>
+  </div>
+
+  <!-- TAILOR REGISTER MODAL -->
+  <div class="modal" id="modal-tailor" style="display:none">
+    <div class="modal-header">
+      <h2>Join as a tailor</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Your name / shop name</label>
+        <input type="text" placeholder="e.g. Ravi Sharma or Sharma Tailors">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone number</label>
+          <input type="tel" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" placeholder="Your city">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Years of experience</label>
+        <select>
+          <option>Less than 1 year</option>
+          <option>1–3 years</option>
+          <option>3–5 years</option>
+          <option>5–10 years</option>
+          <option>10+ years</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Specialisation</label>
+        <select>
+          <option>Ladies wear (blouse, lehenga, suits)</option>
+          <option>Gents wear (sherwani, kurta, suits)</option>
+          <option>Kids wear</option>
+          <option>All types</option>
+          <option>Alterations only</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Do you offer home visits?</label>
+        <select>
+          <option>Yes, I can visit customers at home</option>
+          <option>Yes, I can pick up cloth</option>
+          <option>No, customers visit my shop</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-large" style="width:100%;justify-content:center" onclick="showToast('🎉 Welcome! Our team will call you within 24 hours.');closeModal()">Submit application</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  let activeModal = null;
+  function openModal(type) {
+    closeModal();
+    const overlay = document.getElementById('modal-overlay');
+    const modal = document.getElementById('modal-' + type);
+    if (!modal) return;
+    overlay.style.display = 'flex';
+    modal.style.display = 'block';
+    activeModal = type;
+    document.body.style.overflow = 'hidden';
+    // Reset book form
+    if (type === 'book') {
+      document.getElementById('book-success').classList.remove('show');
+      document.getElementById('book-form').style.display = 'block';
+      document.querySelector('#modal-book .modal-footer .btn-primary').style.display = 'flex';
+    }
+  }
+
+  function closeModal() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.style.display = 'none';
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    activeModal = null;
+    document.body.style.overflow = '';
+  }
+
+  function closeModalOnBg(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  function switchModal(type) {
+    closeModal();
+    setTimeout(() => openModal(type), 50);
+  }
+
+  function submitBook() {
+    document.getElementById('book-form').style.display = 'none';
+    const footer = document.querySelector('#modal-book .modal-footer');
+    footer.querySelector('.btn-primary').style.display = 'none';
+    document.getElementById('book-success').classList.add('show');
+    showToast('✅ Booking confirmed!');
+  }
+
+  function filterChip(el) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    showToast('Filtering by: ' + el.textContent);
+  }
+
+  // Keyboard close
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
