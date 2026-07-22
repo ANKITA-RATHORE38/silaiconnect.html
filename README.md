@@ -24,10 +24,17 @@ This repository contains the **frontend UI** of the SilaiConnect application.
 ## Project Structure
 
 ```text
-project/
-└── index.html
+SilaiConnect-UI/
+│
+├── index.html
+├── README.md
+└── screenshots/
+    ├── homepage.png
+    ├── tailor-profile.png
+    ├── reviews.png
+    ├── search.png
+    └── mobile-view.png
 ```
-
 ## Getting Started
 
 1. Clone this repository.
