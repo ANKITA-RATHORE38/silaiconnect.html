@@ -28,7 +28,7 @@ SilaiConnect-UI/
 │
 ├── index.html
 ├── README.md
-└── screenshots/
+└── silai/
     ├── homepage.png
     ├── tailor-profile.png
     ├── reviews.png
