@@ -33,7 +33,7 @@ SilaiConnect-UI/
     ├── tailor-profile.png
     ├── reviews.png
     ├── search.png
-    └── mobile-view.png
+    └── process.png
 ```
 ## Getting Started
 
